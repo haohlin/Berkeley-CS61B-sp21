@@ -173,4 +173,20 @@ public class TestAtLeastOneMoveExists {
         assertFalse("No move exists\n" + b,
                 Model.atLeastOneMoveExists(b));
     }
+
+    @Test
+    /** Tests a board where no move exists. */
+    public void testNoMoveExists6() {
+        int[][] rawVals = new int[][] {
+                {2, 0, 0, 0},
+                {2, 0, 0, 0},
+                {0, 0, 0, 0},
+                {4, 0, 0, 0},
+        };
+
+        b = new Board(rawVals, 0);
+        assertTrue("A tilt in any direction will change the board\n"
+                        + b,
+                Model.atLeastOneMoveExists(b));
+    }
 }

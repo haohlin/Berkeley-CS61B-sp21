@@ -5,7 +5,7 @@ import java.util.Observable;
 
 
 /** The state of a game of 2048.
- *  @author TODO: YOUR NAME HERE
+ *  @author Hoahan Lin
  */
 public class Model extends Observable {
     /** Current contents of the board. */
@@ -108,12 +108,47 @@ public class Model extends Observable {
      * */
     public boolean tilt(Side side) {
         boolean changed;
+        board.setViewingPerspective(side);
         changed = false;
+        Tile currTile, prevTile;
+        int[] prevIdx = new int[2];
+        for (int c = 0; c < board.size(); c++){
+            prevIdx[0] = c;
+            prevIdx[1] = board.size() - 1;
+            boolean merged = false;
+            for (int r = board.size() - 1; r >= 0; r--){
+                currTile = board.tile(c, r);
+                if (currTile == null) {
+                    continue;
+                } else if (board.tile(prevIdx[0], prevIdx[1]) == null){
+                    merged = board.move(prevIdx[0], prevIdx[1], currTile);
+                    changed = true;
+
+                } else if (currTile.value() == board.tile(prevIdx[0], prevIdx[1]).value()) {
+                    if (merged){
+                        prevIdx[1] = prevIdx[1] - 1;
+                        changed = true;
+                    }
+                    merged = board.move(prevIdx[0], prevIdx[1], currTile);
+                    if (merged){
+                        score += board.tile(prevIdx[0], prevIdx[1]).value();
+                        changed = true;
+                    }
+                } else {
+                    merged = board.move(prevIdx[0], prevIdx[1] - 1, currTile);
+                    prevIdx[1] = prevIdx[1] - 1;
+                    if (board.tile(prevIdx[0], prevIdx[1]) != currTile){
+                        changed = true;
+                    }
+                }
+            }
+        }
 
         // TODO: Modify this.board (and perhaps this.score) to account
         // for the tilt to the Side SIDE. If the board changed, set the
         // changed local variable to true.
 
+        board.setViewingPerspective(Side.NORTH);
         checkGameOver();
         if (changed) {
             setChanged();
@@ -138,7 +173,16 @@ public class Model extends Observable {
      * */
     public static boolean emptySpaceExists(Board b) {
         // TODO: Fill in this function.
-        return false;
+        boolean exist = false;
+        int boardSize = b.size();
+        for (int i = 0; i < boardSize; i++){
+            for (int j = 0; j < boardSize; j++){
+                if (b.tile(i, j) == null){
+                    exist = true;
+                }
+            }
+        }
+        return exist;
     }
 
     /**
@@ -148,6 +192,16 @@ public class Model extends Observable {
      */
     public static boolean maxTileExists(Board b) {
         // TODO: Fill in this function.
+        int boardSize = b.size();
+        for (int i = 0; i < boardSize; i++){
+            for (int j = 0; j < boardSize; j++){
+                if (b.tile(i, j) == null){
+                    continue;
+                } else if (b.tile(i, j).value() == MAX_PIECE){
+                    return true;
+                }
+            }
+        }
         return false;
     }
 
@@ -159,6 +213,26 @@ public class Model extends Observable {
      */
     public static boolean atLeastOneMoveExists(Board b) {
         // TODO: Fill in this function.
+        int boardSize = b.size();
+        Tile[] neighbors = new Tile[4];
+        for (int i = 0; i < boardSize; i++){
+            for (int j = 0; j < boardSize; j++){
+                if (b.tile(i, j) == null){
+                    return true;
+                }
+                neighbors[0] = i + 1 < boardSize ? b.tile(i+1, j) : null;
+                neighbors[1] = j + 1 < boardSize ? b.tile(i, j+1) : null;
+                neighbors[2] = i - 1 >= 0 ? b.tile(i-1, j) : null;
+                neighbors[3] = j - 1 >= 0 ? b.tile(i, j-1) : null;
+                for (int k = 0; k < 4; k++){
+                    if (neighbors[k] == null){
+                        continue;
+                    } else if (neighbors[k].value() == b.tile(i, j).value()){
+                        return true;
+                    }
+                }
+            }
+        }
         return false;
     }
 
