@@ -5,7 +5,7 @@ import java.util.Observable;
 
 
 /** The state of a game of 2048.
- *  @author Hoahan Lin
+ *  @author Haohan Lin
  */
 public class Model extends Observable {
     /** Current contents of the board. */
